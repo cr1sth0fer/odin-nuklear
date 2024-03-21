@@ -12,6 +12,11 @@ INPUT_MAX :: #config(NUKLEAR_INPUT_MAX, 16)
 MAX_NUMBER_BUFFER :: #config(NUKLEAR_MAX_NUMBER_BUFFER, 64)
 SCROLLBAR_HIDING_TIMEOUT :: #config(NUKLEAR_SCROLLBAR_HIDING_TIMEOUT, 4.0)
 
+INCLUDE_FONT_BAKING :: #config(NK_INCLUDE_FONT_BAKING, false)
+INCLUDE_DEFAULT_ALLOCATOR :: #config(NK_INCLUDE_DEFAULT_ALLOCATOR, false)
+INCLUDE_DEFAULT_FONT :: #config(NK_INCLUDE_DEFAULT_FONT, false)
+INCLUDE_STANDARD_IO :: #config(NK_INCLUDE_STANDARD_IO, false)
+
 Char :: rune
 UChar :: u8
 UByte :: u8
@@ -1299,7 +1304,7 @@ Style_Button :: struct
     text_normal,
     text_hover,
     text_active: Color,
-    text_alignment: Flags,
+    text_alignment: Text_Alignment,
     color_factor_text: f32,
 
     /* properties */
@@ -1334,7 +1339,7 @@ Style_Toggle :: struct
     text_hover,
     text_active,
     text_background: Color,
-    text_alignment: Flags,
+    text_alignment: Text_Alignment,
 
     /* properties */
     padding,
@@ -1372,7 +1377,7 @@ Style_Selectable :: struct
     text_hover_active,
     text_pressed_active,
     text_background: Color,
-    text_alignment: Flags,
+    text_alignment: Text_Alignment,
 
     /* properties */
     rounding: f32,
@@ -4001,7 +4006,7 @@ foreign nuklear
     text_wrap :: proc(ctx: ^Context, name: cstring, i: i32) ---
     text_wrap_colored :: proc(ctx: ^Context, name: cstring, i32, color: Color) ---
     label :: proc(ctx: ^Context, name: cstring, align: Text_Alignment) ---
-    label_colored :: proc(ctx: ^Context, name: cstring, align: Flags, color: Color) ---
+    label_colored :: proc(ctx: ^Context, name: cstring, align: Text_Alignment, color: Color) ---
     label_wrap :: proc(ctx: ^Context, name: cstring) ---
     label_colored_wrap :: proc(ctx: ^Context, name: cstring, color: Color) ---
     image :: proc(ctx: ^Context, image: Image) ---
@@ -4031,55 +4036,55 @@ foreign nuklear
     button_color :: proc(ctx: ^Context, color: Color) -> bool ---
     button_symbol :: proc(ctx: ^Context, type: Symbol_Type) -> bool ---
     button_image :: proc(ctx: ^Context, img: Image) -> bool ---
-    button_symbol_label :: proc(ctx: ^Context, type: Symbol_Type, cstring, text_alignment: Flags) -> bool ---
-    button_symbol_text :: proc(ctx: ^Context, type: Symbol_Type, cstring, len: i32, alignment: Flags) -> bool ---
-    button_image_label :: proc(ctx: ^Context, img: Image, cstring, text_alignment: Flags) -> bool ---
-    button_image_text :: proc(ctx: ^Context, img: Image, cstring, len: i32, alignment: Flags) -> bool ---
+    button_symbol_label :: proc(ctx: ^Context, type: Symbol_Type, cstring, text_alignment: Text_Alignment) -> bool ---
+    button_symbol_text :: proc(ctx: ^Context, type: Symbol_Type, cstring, len: i32, alignment: Text_Alignment) -> bool ---
+    button_image_label :: proc(ctx: ^Context, img: Image, cstring, text_alignment: Text_Alignment) -> bool ---
+    button_image_text :: proc(ctx: ^Context, img: Image, cstring, len: i32, alignment: Text_Alignment) -> bool ---
     button_text_styled :: proc(ctx: ^Context, style: ^Style_Button, title: cstring, len: i32) -> bool ---
     button_label_styled :: proc(ctx: ^Context, style: ^Style_Button, title: cstring) -> bool ---
     button_symbol_styled :: proc(ctx: ^Context, style: ^Style_Button, type: Symbol_Type) -> bool ---
     button_image_styled :: proc(ctx: ^Context, style: ^Style_Button, img: Image) -> bool ---
-    button_symbol_text_styled :: proc(ctx: ^Context, style: ^Style_Button, symbol: Symbol_Type, title: cstring, len: i32, alignment: Flags) -> bool ---
-    button_symbol_label_styled :: proc(ctx: ^Context, style: ^Style_Button, symbol: Symbol_Type, title: cstring, align: Flags) -> bool ---
-    button_image_label_styled :: proc(ctx: ^Context, style: ^Style_Button, img: Image, title: cstring, text_alignment: Flags) -> bool ---
-    button_image_text_styled :: proc(ctx: ^Context, style: ^Style_Button, img: Image, title: cstring, len: i32, alignment: Flags) -> bool ---
+    button_symbol_text_styled :: proc(ctx: ^Context, style: ^Style_Button, symbol: Symbol_Type, title: cstring, len: i32, alignment: Text_Alignment) -> bool ---
+    button_symbol_label_styled :: proc(ctx: ^Context, style: ^Style_Button, symbol: Symbol_Type, title: cstring, align: Text_Alignment) -> bool ---
+    button_image_label_styled :: proc(ctx: ^Context, style: ^Style_Button, img: Image, title: cstring, text_alignment: Text_Alignment) -> bool ---
+    button_image_text_styled :: proc(ctx: ^Context, style: ^Style_Button, img: Image, title: cstring, len: i32, alignment: Text_Alignment) -> bool ---
     button_set_behavior :: proc(ctx: ^Context, behavior: Button_Behavior) ---
     button_push_behavior :: proc(ctx: ^Context, behavior: Button_Behavior) -> bool ---
     button_pop_behavior :: proc(ctx: ^Context) -> bool ---
 
     check_label :: proc(ctx: ^Context, label: cstring, active: bool) -> bool ---
     check_text :: proc(ctx: ^Context, label: cstring, len: i32, active: bool) -> bool ---
-    check_text_align :: proc(ctx: ^Context, label: cstring, len: i32, active: bool, widget_alignment: Flags, text_alignment: Flags) -> bool ---
+    check_text_align :: proc(ctx: ^Context, label: cstring, len: i32, active: bool, widget_alignment: Text_Alignment, text_alignment: Text_Alignment) -> bool ---
     check_flags_label :: proc(ctx: ^Context, label: cstring, flags, value: u32) -> u32 ---
     check_flags_text :: proc(ctx: ^Context, label: cstring, len: i32, flags, value: u32) -> u32 ---
     checkbox_label :: proc(ctx: ^Context, label: cstring, active: ^bool) -> bool ---
-    checkbox_label_align :: proc(ctx: ^Context, label: cstring, active: ^bool, widget_alignment, text_alignment: Flags) -> bool ---
+    checkbox_label_align :: proc(ctx: ^Context, label: cstring, active: ^bool, widget_alignment, text_alignment: Text_Alignment) -> bool ---
     checkbox_text :: proc(ctx: ^Context, label: cstring, len: i32, active: ^bool) -> bool  ---
-    checkbox_text_align :: proc(ctx: ^Context, label: cstring, len: i32, active: ^bool, widget_alignment, text_alignment: Flags) -> bool ---
+    checkbox_text_align :: proc(ctx: ^Context, label: cstring, len: i32, active: ^bool, widget_alignment, text_alignment: Text_Alignment) -> bool ---
     checkbox_flags_label :: proc(ctx: ^Context, label: cstring, flags: ^u32, value: u32) -> bool ---
     checkbox_flags_text :: proc(ctx: ^Context, label: cstring, len: i32, flags: ^u32, value: u32) -> bool ---
 
     radio_label :: proc(ctx: ^Context, label: cstring, active: ^bool) -> bool ---
-    radio_label_align :: proc(ctx: ^Context, label: cstring, active: ^bool, widget_alignment, text_alignment: Flags) -> bool ---
+    radio_label_align :: proc(ctx: ^Context, label: cstring, active: ^bool, widget_alignment, text_alignment: Text_Alignment) -> bool ---
     radio_text :: proc(ctx: ^Context, text: cstring, len: i32, active: ^bool) -> bool ---
-    radio_text_align :: proc(ctx: ^Context, text: cstring, len: i32, active: ^bool, widget_alignment, text_alignment: Flags) -> bool ---
+    radio_text_align :: proc(ctx: ^Context, text: cstring, len: i32, active: ^bool, widget_alignment, text_alignment: Text_Alignment) -> bool ---
     option_label :: proc(ctx: ^Context, label: cstring, active: bool) -> bool ---
-    option_label_align :: proc(ctx: ^Context, label: cstring, active: bool, widget_alignment, text_alignment: Flags) -> bool ---
+    option_label_align :: proc(ctx: ^Context, label: cstring, active: bool, widget_alignment, text_alignment: Text_Alignment) -> bool ---
     option_text :: proc(ctx: ^Context, text: cstring, len: i32, active: bool) -> bool ---
-    option_text_align :: proc(ctx: ^Context, text: cstring, len: i32, is_active: bool, widget_alignment, text_alignment: Flags) -> bool ---
+    option_text_align :: proc(ctx: ^Context, text: cstring, len: i32, is_active: bool, widget_alignment, text_alignment: Text_Alignment) -> bool ---
 
     selectable_label :: proc(ctx: ^Context, label: cstring, align: Text_Alignment, value: ^bool) -> bool ---
     selectable_text :: proc(ctx: ^Context, label: [^]u8, len: i32, align: Text_Alignment, value: ^bool) -> bool ---
-    selectable_image_label :: proc(ctx: ^Context, img: Image,  text: cstring, align: Flags, value: ^bool) -> bool ---
-    selectable_image_text :: proc(ctx: ^Context, img: Image, text: cstring, len: i32, align: Flags, value: ^bool) -> bool ---
-    selectable_symbol_label :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, align: Flags, value: ^bool) -> bool ---
-    selectable_symbol_text :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, len: i32, align: Flags, value: ^bool) -> bool ---
-    select_label :: proc(ctx: ^Context, label: cstring, align: Flags, value: ^bool) -> bool ---
+    selectable_image_label :: proc(ctx: ^Context, img: Image,  text: cstring, align: Text_Alignment, value: ^bool) -> bool ---
+    selectable_image_text :: proc(ctx: ^Context, img: Image, text: cstring, len: i32, align: Text_Alignment, value: ^bool) -> bool ---
+    selectable_symbol_label :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, align: Text_Alignment, value: ^bool) -> bool ---
+    selectable_symbol_text :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, len: i32, align: Text_Alignment, value: ^bool) -> bool ---
+    select_label :: proc(ctx: ^Context, label: cstring, align: Text_Alignment, value: ^bool) -> bool ---
     select_text :: proc(ctx: ^Context, label: [^]u8, len: i32, align: Text_Alignment, value: ^bool) -> bool ---
-    select_image_label :: proc(ctx: ^Context, img: Image, text: cstring, align: Flags, value: ^bool) -> bool ---
-    select_image_text :: proc(ctx: ^Context, img: Image, text: cstring, len: i32, align: Flags, value: ^bool) -> bool ---
-    select_symbol_label :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, align: Flags, value: ^bool) -> bool ---
-    select_symbol_text :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, len: i32, align: Flags, value: ^bool) -> bool ---
+    select_image_label :: proc(ctx: ^Context, img: Image, text: cstring, align: Text_Alignment, value: ^bool) -> bool ---
+    select_image_text :: proc(ctx: ^Context, img: Image, text: cstring, len: i32, align: Text_Alignment, value: ^bool) -> bool ---
+    select_symbol_label :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, align: Text_Alignment, value: ^bool) -> bool ---
+    select_symbol_text :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, len: i32, align: Text_Alignment, value: ^bool) -> bool ---
 
     slide_float :: proc(ctx: ^Context, min, val, max, step: f32) -> f32 ---
     slide_int :: proc(ctx: ^Context, min, val, max, step: i32) -> i32 ---
@@ -4277,21 +4282,21 @@ foreign nuklear
     combo_begin_image_label :: proc(ctx: ^Context, selected: cstring, img: Image, size: Vec2) -> bool ---
     combo_begin_image_text :: proc(ctx: ^Context,  selected: cstring, len: i32, img: Image, size: Vec2) -> bool ---
     combo_item_label :: proc(ctx: ^Context, text: cstring, alignment: Text_Alignment) -> bool ---
-    combo_item_text :: proc(ctx: ^Context, text: cstring, len: i32, alignment: Flags) -> bool ---
-    combo_item_image_label :: proc(ctx: ^Context, img: Image, text: cstring, alignment: Flags) -> bool ---
-    combo_item_image_text :: proc(ctx: ^Context, img: Image, text: cstring, len: i32, alignment: Flags) -> bool ---
-    combo_item_symbol_label :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, alignment: Flags) -> bool ---
-    combo_item_symbol_text :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, len: i32, alignment: Flags) -> bool ---
+    combo_item_text :: proc(ctx: ^Context, text: cstring, len: i32, alignment: Text_Alignment) -> bool ---
+    combo_item_image_label :: proc(ctx: ^Context, img: Image, text: cstring, alignment: Text_Alignment) -> bool ---
+    combo_item_image_text :: proc(ctx: ^Context, img: Image, text: cstring, len: i32, alignment: Text_Alignment) -> bool ---
+    combo_item_symbol_label :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, alignment: Text_Alignment) -> bool ---
+    combo_item_symbol_text :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, len: i32, alignment: Text_Alignment) -> bool ---
     combo_close :: proc(ctx: ^Context) ---
     combo_end :: proc(ctx: ^Context) ---
 
     contextual_begin :: proc(ctx: ^Context, flags: Flags, v: Vec2, trigger_bounds: Rect) -> bool ---
-    contextual_item_text :: proc(ctx: ^Context, text: cstring, len: i32, align: Flags) -> bool ---
-    contextual_item_label :: proc(ctx: ^Context, text: cstring, align: Flags) -> bool ---
-    contextual_item_image_label :: proc(ctx: ^Context, img: Image, text: cstring, alignment: Flags) -> bool ---
-    contextual_item_image_text :: proc(ctx: ^Context, img: Image, text: cstring, len: i32, alignment: Flags) -> bool ---
-    contextual_item_symbol_label :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, alignment: Flags) -> bool ---
-    contextual_item_symbol_text :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, len: i32, alignment: Flags) -> bool ---
+    contextual_item_text :: proc(ctx: ^Context, text: cstring, len: i32, align: Text_Alignment) -> bool ---
+    contextual_item_label :: proc(ctx: ^Context, text: cstring, align: Text_Alignment) -> bool ---
+    contextual_item_image_label :: proc(ctx: ^Context, img: Image, text: cstring, alignment: Text_Alignment) -> bool ---
+    contextual_item_image_text :: proc(ctx: ^Context, img: Image, text: cstring, len: i32, alignment: Text_Alignment) -> bool ---
+    contextual_item_symbol_label :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, alignment: Text_Alignment) -> bool ---
+    contextual_item_symbol_text :: proc(ctx: ^Context, symbol: Symbol_Type, text: cstring, len: i32, alignment: Text_Alignment) -> bool ---
     contextual_close :: proc(ctx: ^Context) ---
     contextual_end :: proc(ctx: ^Context) ---
 
@@ -4308,20 +4313,20 @@ foreign nuklear
 
     menubar_begin :: proc(ctx: ^Context) ---
     menubar_end :: proc(ctx: ^Context) ---
-    menu_begin_text :: proc(ctx: ^Context, str: cstring, title_len: i32, align: Flags, size: Vec2) -> bool ---
+    menu_begin_text :: proc(ctx: ^Context, str: cstring, title_len: i32, align: Text_Alignment, size: Vec2) -> bool ---
     menu_begin_label :: proc(ctx: ^Context, str: cstring, align: Text_Alignment, size: Vec2) -> bool ---
     menu_begin_image :: proc(ctx: ^Context, str: cstring, img: Image, size: Vec2) -> bool ---
-    menu_begin_image_text :: proc(ctx: ^Context, str: cstring, len: i32, align: Flags, img: Image, size: Vec2) -> bool ---
-    menu_begin_image_label :: proc(ctx: ^Context, str: cstring, align: Flags, img: Image, size: Vec2) -> bool ---
+    menu_begin_image_text :: proc(ctx: ^Context, str: cstring, len: i32, align: Text_Alignment, img: Image, size: Vec2) -> bool ---
+    menu_begin_image_label :: proc(ctx: ^Context, str: cstring, align: Text_Alignment, img: Image, size: Vec2) -> bool ---
     menu_begin_symbol :: proc(ctx: ^Context, str: cstring, symbol: Symbol_Type, size: Vec2) -> bool ---
-    menu_begin_symbol_text :: proc(ctx: ^Context, str: cstring, len: i32, align: Flags, symbol: Symbol_Type, size: Vec2) -> bool ---
-    menu_begin_symbol_label :: proc(ctx: ^Context, str: cstring, align: Flags, symbol: Symbol_Type, size: Vec2) -> bool ---
-    menu_item_text :: proc(ctx: ^Context, str: cstring, len: i32, align: Flags) -> bool ---
-    menu_item_label :: proc(ctx: ^Context, str: cstring, alignment: Flags) -> bool ---
-    menu_item_image_label :: proc(ctx: ^Context, img: Image, str: cstring, alignment: Flags) -> bool ---
-    menu_item_image_text :: proc(ctx: ^Context, img: Image, str: cstring, len: i32, alignment: Flags) -> bool ---
-    menu_item_symbol_text :: proc(ctx: ^Context, symbol: Symbol_Type, str: cstring, i32, alignment: Flags) -> bool ---
-    menu_item_symbol_label :: proc(ctx: ^Context, symbol: Symbol_Type, str: cstring, alignment: Flags) -> bool ---
+    menu_begin_symbol_text :: proc(ctx: ^Context, str: cstring, len: i32, align: Text_Alignment, symbol: Symbol_Type, size: Vec2) -> bool ---
+    menu_begin_symbol_label :: proc(ctx: ^Context, str: cstring, align: Text_Alignment, symbol: Symbol_Type, size: Vec2) -> bool ---
+    menu_item_text :: proc(ctx: ^Context, str: cstring, len: i32, align: Text_Alignment) -> bool ---
+    menu_item_label :: proc(ctx: ^Context, str: cstring, alignment: Text_Alignment) -> bool ---
+    menu_item_image_label :: proc(ctx: ^Context, img: Image, str: cstring, alignment: Text_Alignment) -> bool ---
+    menu_item_image_text :: proc(ctx: ^Context, img: Image, str: cstring, len: i32, alignment: Text_Alignment) -> bool ---
+    menu_item_symbol_text :: proc(ctx: ^Context, symbol: Symbol_Type, str: cstring, i32, alignment: Text_Alignment) -> bool ---
+    menu_item_symbol_label :: proc(ctx: ^Context, symbol: Symbol_Type, str: cstring, alignment: Text_Alignment) -> bool ---
     menu_close :: proc(ctx: ^Context) ---
     menu_end :: proc(ctx: ^Context) ---
 
@@ -4673,77 +4678,4 @@ foreign nuklear
     style_item_image :: proc(img: Image) -> Style_Item ---
     style_item_nine_slice :: proc(slice: Nine_Slice) -> Style_Item ---
     style_item_hide :: proc() -> Style_Item ---
-}
-    
-INCLUDE_FONT_BAKING :: #config(NK_INCLUDE_FONT_BAKING, false)
-INCLUDE_DEFAULT_ALLOCATOR :: #config(NK_INCLUDE_DEFAULT_ALLOCATOR, false)
-INCLUDE_DEFAULT_FONT :: #config(NK_INCLUDE_DEFAULT_FONT, false)
-INCLUDE_STANDARD_IO :: #config(NK_INCLUDE_STANDARD_IO, false)
-
-
-import "core:strings"
-import "core:fmt"
-
-text_string :: #force_inline proc(ctx: ^Context, name: string, alignment: Text_Alignment)
-{
-    text(ctx, raw_data(name), cast(i32)len(name), alignment)
-}
-
-label_string :: proc(ctx: ^Context, name: string, align: Text_Alignment)
-{
-    cstr_name, err := strings.clone_to_cstring(name, context.temp_allocator)
-    if err != .None do return
-    label(ctx, cstr_name, align)
-}
-
-label_args :: proc(ctx: ^Context, align: Text_Alignment, args: ..any, sep := " ")
-{
-    b: strings.Builder
-    strings.builder_init_len_cap(&b, 0, 1024, context.temp_allocator)
-    fmt.sbprint(&b, args = args, sep = sep)
-    strings.write_byte(&b, 0)
-    data := strings.to_string(b)
-    label(ctx, transmute(cstring)raw_data(data), align)
-}
-
-checkbox_text_args :: proc(ctx: ^Context, active: ^bool, args: ..any, sep := " ") -> bool
-{
-    b: strings.Builder
-    strings.builder_init_len_cap(&b, 0, 1024, context.temp_allocator)
-    fmt.sbprint(&b, args = args, sep = sep)
-    strings.write_byte(&b, 0)
-    data := strings.to_string(b)
-    return checkbox_label(ctx, transmute(cstring)raw_data(data), active)
-}
-
-selectable_text_string :: #force_inline proc "contextless" (ctx: ^Context, label: string, align: Text_Alignment, value: ^bool) -> bool
-{
-    return selectable_text(ctx, raw_data(label), cast(i32)len(label), align, value)
-}
-
-@(deferred_in=widget_disable_end)
-widget_quick_disable :: proc(ctx: ^Context)
-{
-    widget_disable_begin(ctx)
-}
-
-tree_push_string :: proc(ctx: ^Context, type: Tree_Type, title: string, initial_state: Collapse_States, caller_location := #caller_location) -> bool
-{
-    cstr_title, cstr_title_allocation_error := strings.clone_to_cstring(title, context.temp_allocator)
-    if cstr_title_allocation_error != .None do return false
-    return tree_push_hashed(ctx, type, cstr_title, initial_state, raw_data(caller_location.procedure), cast(i32)len(caller_location.procedure), caller_location.line)
-}
-
-tree_push_string_hash_args :: proc(ctx: ^Context, type: Tree_Type, title: string, initial_state: Collapse_States, hash_args: ..any, hash_args_sep := " ", caller_location := #caller_location) -> bool
-{
-    cstr_title, cstr_title_allocation_error := strings.clone_to_cstring(title, context.temp_allocator)
-    if cstr_title_allocation_error != .None do return false
-
-    b: strings.Builder
-    strings.builder_init_len_cap(&b, 0, 1024, context.temp_allocator)
-    fmt.sbprint(&b, args = hash_args, sep = hash_args_sep)
-    strings.write_byte(&b, 0)
-    args_string := strings.to_string(b)
-
-    return tree_push_hashed(ctx, type, cstr_title, initial_state, raw_data(args_string), cast(i32)len(args_string), caller_location.line)
 }
