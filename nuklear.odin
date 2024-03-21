@@ -2206,11 +2206,6 @@ when ODIN_OS == .Windows && ODIN_ARCH == .amd64
    foreign import nuklear "nuklear_windows_amd64.lib"
 }
 
-//when ODIN_OS == .Windows && ODIN_ARCH == .amd64 && ODIN_DEBUG
-//{
-//    foreign import nuklear "nuklear_windows_amd64_debug.lib"
-//}
-
 @(default_calling_convention="c", link_prefix="nk_")
 foreign nuklear
 {
