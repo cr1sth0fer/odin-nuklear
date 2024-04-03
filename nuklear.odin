@@ -5,9 +5,6 @@ UNDEFINED :: -1.0
 /* internal invalid utf8 rune */
 UTF_INVALID : rune : 0xFFFD
 
-/* describes the number of bytes a glyph consists of */
-UTF_SIZE :: 4
-
 INPUT_MAX :: #config(NUKLEAR_INPUT_MAX, 16)
 MAX_NUMBER_BUFFER :: #config(NUKLEAR_MAX_NUMBER_BUFFER, 64)
 SCROLLBAR_HIDING_TIMEOUT :: #config(NUKLEAR_SCROLLBAR_HIDING_TIMEOUT, 4.0)
@@ -16,17 +13,8 @@ INCLUDE_COMMAND_USERDATA :: #config(NK_INCLUDE_COMMAND_USERDATA, true)
 INCLUDE_DEFAULT_ALLOCATOR :: #config(NK_INCLUDE_DEFAULT_ALLOCATOR, true)
 KEYSTATE_BASED_INPUT :: #config(NK_KEYSTATE_BASED_INPUT, true)
 
-Char :: rune
-UChar :: u8
-UByte :: u8
-Short :: i16
-Int :: i32
-Size :: i64
-Ptr :: rawptr
-
 Hash :: u32
 Flags :: u32
-Rune :: u32
 
 Color   :: [4]u8
 ColorF  :: [4]f32
@@ -512,7 +500,7 @@ Memory_Status :: struct
     size,
     allocated,
     needed,
-    calls: Size,
+    calls: i64,
 }
 
 Allocation_Type :: enum i32
@@ -530,13 +518,13 @@ Buffer_Allocation_Type :: enum i32
 Buffer_Marker :: struct
 {
     active: bool,
-    offset: Size,
+    offset: i64,
 }
 
 Memory :: struct
 {
     ptr: rawptr,
-    size: Size,
+    size: i64,
 }
 
 Buffer :: struct
@@ -557,16 +545,16 @@ Buffer :: struct
     grow_factor: f32,
 
     /* total amount of memory allocated */
-    allocated: Size,
+    allocated: i64,
 
     /* totally consumed memory given that enough memory is present */
-    needed: Size,
+    needed: i64,
 
     /* number of allocation calls */
-    calls: Size,
+    calls: i64,
 
     /* current size of the buffer */
-    size: Size
+    size: i64
 }
 
 /*  Basic string buffer which is only used in context with the text editor
@@ -671,7 +659,7 @@ Command_Type :: enum i32
 Command :: struct
 {
     type: Command_Type,
-    next: Size,
+    next: i64,
     userdata: Handle,
 }
 
@@ -853,7 +841,7 @@ Command_Buffer :: struct
     clip: Rect,
     use_clipping: i32,
     userdata: Handle,
-    begin, end, last: Size,
+    begin, end, last: i64,
 }
 
 Mouse_Button :: struct
@@ -1451,7 +1439,7 @@ Popup_Buffer :: struct
     begin,
     parent,
     last,
-    end: Size,
+    end: i64,
     active: bool,
 }
 
@@ -1659,7 +1647,7 @@ Pool :: struct
     freelist: ^Page_Element,
     capacity: u32,
     size,
-    cap: Size,
+    cap: i64,
 }
 
 Context :: struct
@@ -3216,7 +3204,7 @@ foreign nuklear
     __title__   | Label printed in the tree header
     __state__   | Initial tree state value out of nk_collapse_states
     __hash__    | Memory block or string to generate the ID from
-    __len__     | Size of passed memory block or string in __hash__
+    __len__     | i64 of passed memory block or string in __hash__
     __seed__    | Seeding value if this function is called in a loop or default to `0`
     
     Returns `true(1)` if visible and fillable with widgets or `false(0)` otherwise
@@ -3286,7 +3274,7 @@ foreign nuklear
     __title__   | Label printed in the tree header
     __state__   | Initial tree state value out of nk_collapse_states
     __hash__    | Memory block or string to generate the ID from
-    __len__     | Size of passed memory block or string in __hash__
+    __len__     | i64 of passed memory block or string in __hash__
     __seed__    | Seeding value if this function is called in a loop or default to `0`
     
     Returns `true(1)` if visible and fillable with widgets or `false(0)` otherwise
@@ -3451,8 +3439,8 @@ foreign nuklear
     slider_float :: proc(ctx: ^Context, min: f32, val: ^f32, max, step: f32) -> bool ---
     slider_int :: proc(ctx: ^Context, min, val: ^i32, max, step: i32) -> bool ---
 
-    progress :: proc(ctx: ^Context, cur: ^Size, max: Size, modifyable: bool) -> bool ---
-    prog :: proc(ctx: ^Context, cur: Size, max: Size, modifyable: bool) -> Size ---
+    progress :: proc(ctx: ^Context, cur: ^i64, max: i64, modifyable: bool) -> bool ---
+    prog :: proc(ctx: ^Context, cur: i64, max: i64, modifyable: bool) -> i64 ---
 
     color_picker :: proc(ctx: ^Context, color: ColorF, format: Color_Format) -> ColorF ---
     color_pick :: proc(ctx: ^Context, color: ^ColorF, format: Color_Format) -> bool ---
@@ -3825,22 +3813,22 @@ foreign nuklear
 
     buffer_init_default :: proc(^Buffer) ---
 
-    buffer_init :: proc(buffer: ^Buffer, allocator: ^Allocator, size: Size) ---
-    buffer_init_fixed :: proc(buffer: ^Buffer, memory: rawptr, size: Size) ---
+    buffer_init :: proc(buffer: ^Buffer, allocator: ^Allocator, size: i64) ---
+    buffer_init_fixed :: proc(buffer: ^Buffer, memory: rawptr, size: i64) ---
     buffer_info :: proc(status: ^Memory_Status, buffer: ^Buffer) ---
-    buffer_push :: proc(buffer: ^Buffer, type: Buffer_Allocation_Type, memory: rawptr, size, align: Size) ---
+    buffer_push :: proc(buffer: ^Buffer, type: Buffer_Allocation_Type, memory: rawptr, size, align: i64) ---
     buffer_mark :: proc(buffer: ^Buffer, type: Buffer_Allocation_Type) ---
     buffer_reset :: proc(buffer: ^Buffer, type: Buffer_Allocation_Type) ---
     buffer_clear :: proc(buffer: ^Buffer) ---
     buffer_free :: proc(buffer: ^Buffer) ---
     buffer_memory :: proc(buffer: ^Buffer) -> rawptr ---
     buffer_memory_const :: proc(buffer: ^Buffer) -> rawptr ---
-    buffer_total :: proc(buffer: ^Buffer) -> Size ---
+    buffer_total :: proc(buffer: ^Buffer) -> i64 ---
 
     str_init_default :: proc(str: ^Str) ---
 
-    str_init :: proc(str: ^Str, allocator: ^Allocator, size: Size) ---
-    str_init_fixed :: proc(str: ^Str, memory: rawptr, size: Size) ---
+    str_init :: proc(str: ^Str, allocator: ^Allocator, size: i64) ---
+    str_init_fixed :: proc(str: ^Str, memory: rawptr, size: i64) ---
     str_clear :: proc(str: ^Str) ---
     str_free :: proc(str: ^Str) ---
 
@@ -3887,8 +3875,8 @@ foreign nuklear
 
     textedit_init_default :: proc(edit: ^Text_Edit) ---
 
-    textedit_init :: proc(edit: ^Text_Edit, allocator: ^Allocator, size: Size) ---
-    textedit_init_fixed :: proc(edit: ^Text_Edit, memory: rawptr, size: Size) ---
+    textedit_init :: proc(edit: ^Text_Edit, allocator: ^Allocator, size: i64) ---
+    textedit_init_fixed :: proc(edit: ^Text_Edit, memory: rawptr, size: i64) ---
     textedit_free :: proc(edit: ^Text_Edit) ---
     textedit_text :: proc(edit: ^Text_Edit, cstr: cstring, total_len: i32) ---
     textedit_delete :: proc(edit: ^Text_Edit, where_, len: i32) ---
