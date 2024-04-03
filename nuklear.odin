@@ -12,49 +12,63 @@ INPUT_MAX :: #config(NUKLEAR_INPUT_MAX, 16)
 MAX_NUMBER_BUFFER :: #config(NUKLEAR_MAX_NUMBER_BUFFER, 64)
 SCROLLBAR_HIDING_TIMEOUT :: #config(NUKLEAR_SCROLLBAR_HIDING_TIMEOUT, 4.0)
 
-INCLUDE_FONT_BAKING :: #config(NK_INCLUDE_FONT_BAKING, false)
-INCLUDE_DEFAULT_ALLOCATOR :: #config(NK_INCLUDE_DEFAULT_ALLOCATOR, false)
-INCLUDE_DEFAULT_FONT :: #config(NK_INCLUDE_DEFAULT_FONT, false)
-INCLUDE_STANDARD_IO :: #config(NK_INCLUDE_STANDARD_IO, false)
+INCLUDE_COMMAND_USERDATA :: #config(NK_INCLUDE_COMMAND_USERDATA, true)
+INCLUDE_DEFAULT_ALLOCATOR :: #config(NK_INCLUDE_DEFAULT_ALLOCATOR, true)
+KEYSTATE_BASED_INPUT :: #config(NK_KEYSTATE_BASED_INPUT, true)
 
 Char :: rune
 UChar :: u8
 UByte :: u8
 Short :: i16
-UShort :: u16
 Int :: i32
-UInt :: u32
 Size :: i64
 Ptr :: rawptr
 
-/// NK_INCLUDE_DEFAULT_ALLOCATOR    | If defined it will include header `<stdlib.h>` and provide additional functions to use this library without caring for memory allocation control and therefore ease memory management.
-/// NK_INCLUDE_STANDARD_IO          | If defined it will include header `<stdio.h>` and provide additional functions depending on file loading.
-/// NK_INCLUDE_STANDARD_VARARGS     | If defined it will include header <stdarg.h> and provide additional functions depending on file loading.
-/// NK_INCLUDE_STANDARD_BOOL        | If defined it will include header `<stdbool.h>` for nk_bool otherwise nuklear defines nk_bool as int.
-/// NK_INCLUDE_VERTEX_BUFFER_OUTPUT | Defining this adds a vertex draw command list backend to this library, which allows you to convert queue commands into vertex draw commands. This is mainly if you need a hardware accessible format for OpenGL, DirectX, Vulkan, Metal,...
-/// NK_INCLUDE_FONT_BAKING          | Defining this adds `stb_truetype` and `stb_rect_pack` implementation to this library and provides font baking and rendering. If you already have font handling or do not want to use this font handler you don't have to define it.
-/// NK_INCLUDE_DEFAULT_FONT         | Defining this adds the default font: ProggyClean.ttf into this library which can be loaded into a font atlas and allows using this library without having a truetype font
-/// NK_INCLUDE_COMMAND_USERDATA     | Defining this adds a userdata pointer into each command. Can be useful for example if you want to provide custom shaders depending on the used widget. Can be combined with the style structures.
-/// NK_BUTTON_TRIGGER_ON_RELEASE    | Different platforms require button clicks occurring either on buttons being pressed (up to down) or released (down to up). By default this library will react on buttons being pressed, but if you define this it will only trigger if a button is released.
-/// NK_ZERO_COMMAND_MEMORY          | Defining this will zero out memory for each drawing command added to a drawing queue (inside nk_command_buffer_push). Zeroing command memory is very useful for fast checking (using memcmp) if command buffers are equal and avoid drawing frames when nothing on screen has changed since previous frame.
-/// NK_UINT_DRAW_INDEX              | Defining this will set the size of vertex index elements when using NK_VERTEX_BUFFER_OUTPUT to 32bit instead of the default of 16bit
-/// NK_KEYSTATE_BASED_INPUT         | Define this if your backend uses key state for each frame rather than key press/release events
+Hash :: u32
+Flags :: u32
+Rune :: u32
 
-Hash :: UInt
-Flags :: UInt
-Rune :: UInt
+Color   :: [4]u8
+ColorF  :: [4]f32
+Vec2    :: [2]f32
+Vec2I   :: [2]i16
 
-Color :: [4]u8
-ColorF :: [4]f32
-Vec2 :: [2]f32
-Vec2I :: [2]Short
-Rect :: struct {x, y, w, h: f32}
-RectI :: struct {x, y, w, h: Short}
-Handle :: struct #raw_union {ptr: rawptr, id: i32}
-Image :: struct {handle: Handle, w, h: UShort, region: [4]UShort}
-Nine_Slice :: struct {img: Image, l, t, r, b: UShort}
-Cursor :: struct {img: Image, size, offset: Vec2}
-Scroll :: struct {x, y: UInt}
+Rect :: struct
+{
+    x, y, w, h: f32
+}
+
+RectI :: struct
+{
+    x, y, w, h: i16
+}
+
+Handle :: struct #raw_union
+{
+    ptr: rawptr,
+    id: i32
+}
+
+Image :: struct
+{
+    handle: Handle,
+    w, h: u16,
+    region: [4]u16,
+}
+
+Nine_Slice :: struct
+{
+    img: Image,
+    l, t, r, b: u16,
+}
+
+Cursor :: struct
+{
+    img: Image,
+    size, offset: Vec2
+}
+
+Scroll :: [2]u32
 
 Heading :: enum i32
 {
@@ -198,7 +212,6 @@ Keys :: enum i32
     Scroll_End,
     Scroll_Down,
     Scroll_Up,
-    Max,
 }
 
 Buttons :: enum i32
@@ -207,7 +220,6 @@ Buttons :: enum i32
     Middle,
     Right,
     Double,
-    Max,
 }
 
 Anti_Aliasing :: enum i32
@@ -232,39 +244,6 @@ Draw_Null_Texture :: struct
 
     /* coordinates to a white pixel in the texture  */
     uv: Vec2,
-}
-
-Convert_Config :: struct
-{
-    /* global alpha value */
-    global_alpha: f32,
-
-    /* line anti-aliasing flag can be turned off if you are tight on memory */
-    line_aa,
-
-    /* shape anti-aliasing flag can be turned off if you are tight on memory */
-    shape_aa: Anti_Aliasing,
-
-    /* number of segments used for circles: default to 22 */
-    circle_segment_count,
-
-    /* number of segments used for arcs: default to 22 */
-    arc_segment_count,
-
-    /* number of segments used for curves: default to 22 */
-    curve_segment_count: u32,
-
-    /* handle to texture with a white pixel for shape drawing */
-    tex_null: Draw_Null_Texture,
-
-    /* describes the vertex output format and packing */
-    vertex_layout: ^Draw_Vertex_Layout_Element,
-
-    /* sizeof one vertex for vertex packing */
-    vertex_size,
-
-    /* vertex alignment: Can be obtained by NK_ALIGNOF */
-    vertex_alignment: Size,
 }
 
 /*
@@ -483,187 +462,17 @@ Style_Cursor :: enum i32
 }
 
 Text_Width_F :: #type proc "c" (handle: Handle, height: f32, text: cstring, len: i32) -> f32
-Query_Font_Glyph_F :: #type proc "c" (handle: Handle, font_height: f32, glyph: ^User_Font_Glyph, codepoint, next_codepoint: rune)
 
-User_Font_Glyph :: struct
+User_Font :: struct
 {
-    /* texture coordinates */
-    uv: [2]Vec2,
+    /* user provided font handle */
+    userdata: Handle,
 
-    /* offset between top left and glyph */
-    offset: Vec2,
+    /* max height of the font */
+    height: f32,
 
-    /* size of the glyph */
-    width, height,
-
-    /* offset to the next glyph */
-    xadvance: f32,
-}
-
-when #config(NK_INCLUDE_VERTEX_BUFFER_OUTPUT, false) || #config(NK_INCLUDE_SOFTWARE_FONT, false)
-{
-
-}
-
-when #config(NK_INCLUDE_VERTEX_BUFFER_OUTPUT, false)
-{
-    User_Font :: struct
-    {
-        /* user provided font handle */
-        userdata: Handle,
-    
-        /* max height of the font */
-        height: f32,
-    
-        /* font string width in pixel callback */
-        width: Text_Width_F,
-    
-        /* font glyph callback to query drawing info */
-        query: Query_Font_Glyph_F,
-
-        /* texture handle to the used font atlas or texture */
-        texture: Handle,
-    }
-}
-else
-{
-    User_Font :: struct
-    {
-        /* user provided font handle */
-        userdata: Handle,
-    
-        /* max height of the font */
-        height: f32,
-    
-        /* font string width in pixel callback */
-        width: Text_Width_F,
-    }
-}
-
-when #config(NK_INCLUDE_FONT_BAKING, false)
-{
-    Font_Coord_Type :: enum i32
-    {
-        /* texture coordinates inside font glyphs are clamped between 0-1 */
-        UV,
-
-        /* texture coordinates inside font glyphs are in absolute pixel */
-        Pixel,
-    }
-
-    Baked_Font :: struct
-    {
-        /* height of the font  */
-        height: f32,
-
-        /* font glyphs ascent and descent  */
-        ascent, descent: f32,
-
-        /* glyph array offset inside the font glyph baking output array  */
-        glyph_offset: UInt,
-
-        /* number of glyphs of this font inside the glyph baking array output */
-        glyph_count: UInt,
-
-        /* font codepoint ranges as pairs of (from/to) and 0 as last element */
-        ranges: ^rune,
-    };
-
-    Font_Config :: struct
-    {
-        /* NOTE: only used internally */
-        next: ^Font_Config,
-
-        /* pointer to loaded TTF file memory block.
-        * NOTE: not needed for nk_font_atlas_add_from_memory and nk_font_atlas_add_from_file. */
-        ttf_blob: rawptr,
-
-        /* size of the loaded TTF file memory block
-        * NOTE: not needed for nk_font_atlas_add_from_memory and nk_font_atlas_add_from_file. */
-        ttf_size: Size,
-        
-        /* used inside font atlas: default to: 0*/
-        ttf_data_owned_by_atlas: u8,
-
-        /* merges this font into the last font */
-        merge_mode: u8,
-
-        /* align every character to pixel boundary (if true set oversample (1,1)) */
-        pixel_snap: u8,
-
-        /* rasterize at high quality for sub-pixel position */
-        oversample_v, oversample_h: u8,
-        
-        padding: [3]u8,
-
-        /* baked pixel height of the font */
-        size: f32,
-
-        /* texture coordinate format with either pixel or UV coordinates */
-        coord_type: Font_Coord_Type,
-
-        /* extra pixel spacing between glyphs  */
-        spacing: Vec2,
-
-        /* list of unicode ranges (2 values per range, zero terminated) */
-        range: ^rune,
-
-        /* font to setup in the baking process: NOTE: not needed for font atlas */
-        font: ^Baked_Font,
-
-        /* fallback glyph to use if a given rune is not found */
-        fallback_glyph: rune,
-
-        p,
-        n: ^Font_Config,
-    }
-
-    Font_Glyph :: struct
-    {
-        codepoint: rune,
-        xadvance,
-        x0, y0, x1, y1, w, h,
-        u0, v0, u1, v1: f32,
-    }
-
-    Font :: struct
-    {
-        next: ^Font,
-        handle: User_Font,
-        info: Baked_Font,
-        scale: f32,
-        glyphs: [^]Font_Glyph,
-        fallback: ^Font_Glyph,
-        fallback_codepoint: rune,
-        texture: Handle,
-        config: ^Font_Config,
-    }
-
-    Font_Atlas_Format :: enum i32
-    {
-        Alpha8,
-        RGBA32
-    }
-
-    Font_Atlas :: struct
-    {
-        pixel: rawptr,
-        tex_width,
-        tex_height: i32,
-        
-        permanent,
-        temporary: Allocator,
-        
-        custom: RectI,
-        cursors: [CURSOR_COUNT]Cursor,
-        
-        glyph_count: i32,
-        glyphs: [^]Font_Glyph,
-        default_font,
-        fonts: ^Font,
-        config: ^Font_Config,
-        font_num: i32,
-    }
+    /* font string width in pixel callback */
+    width: Text_Width_F,
 }
 
 /*
@@ -716,8 +525,7 @@ Buffer_Allocation_Type :: enum i32
 {
     Front,
     Back,
-    Max,
-};
+}
 
 Buffer_Marker :: struct
 {
@@ -734,7 +542,7 @@ Memory :: struct
 Buffer :: struct
 {
     /* buffer marker to free a buffer to a certain offset */
-    marker: [max(Buffer_Allocation_Type)]Buffer_Marker,
+    marker: [len(Buffer_Allocation_Type)]Buffer_Marker,
 
     /* allocator callback for dynamic buffers */
     pool: Allocator,
@@ -860,22 +668,11 @@ Command_Type :: enum i32
 }
 
 /* command base and header of every command inside the buffer */
-when #config(NK_INCLUDE_COMMAND_USERDATA, true)
+Command :: struct
 {
-    Command :: struct
-    {
-        type: Command_Type,
-        next: Size,
-        userdata: Handle,
-    }
-}
-else
-{
-    Command :: struct
-    {
-        type: Command_Type,
-        next: Size,
-    }
+    type: Command_Type,
+    next: Size,
+    userdata: Handle,
 }
 
 Command_Scissor :: struct
@@ -1034,7 +831,7 @@ Command_Custom :: struct
 Command_Text :: struct
 {
     header: Command,
-    font: User_Font,
+    font: ^User_Font,
     background,
     foreground: Color,
     x, y: i16,
@@ -1052,7 +849,7 @@ Command_Clipping :: enum i32
 
 Command_Buffer :: struct
 {
-    base: Buffer,
+    base: ^Buffer,
     clip: Rect,
     use_clipping: i32,
     userdata: Handle,
@@ -1066,34 +863,16 @@ Mouse_Button :: struct
     clicked_pos: Vec2,
 }
 
-when #config(NK_BUTTON_TRIGGER_ON_RELEASE, false)
+Mouse :: struct
 {
-    Mouse :: struct
-    {
-        buttons: [NK_BUTTON_MAX]mouse_button,
-        pos,
-        down_pos,
-        prev,
-        delta,
-        scroll_delta: Vec2,
-        grab,
-        grabbed,
-        ungrab: u8,
-    }
-}
-else
-{
-    Mouse :: struct
-    {
-        buttons: [max(Buttons)]Mouse_Button,
-        pos,
-        prev,
-        delta,
-        scroll_delta: Vec2,
-        grab,
-        grabbed,
-        ungrab: u8,
-    }
+    buttons: [len(Buttons)]Mouse_Button,
+    pos,
+    prev,
+    delta,
+    scroll_delta: Vec2,
+    grab,
+    grabbed,
+    ungrab: u8,
 }
 
 Key :: struct
@@ -1104,7 +883,7 @@ Key :: struct
 
 Keyboard :: struct
 {
-    keys: [max(Keys)]Key,
+    keys: [len(Keys)]Key,
     text: [INPUT_MAX]u8,
     text_len: i32,
 }
@@ -1113,153 +892,6 @@ Input :: struct
 {
     keyboard: Keyboard,
     mouse: Mouse,
-}
-
-when #config(NK_INCLUDE_VERTEX_BUFFER_OUTPUT, true)
-{
-    /* ### Draw List
-    // The optional vertex buffer draw list provides a 2D drawing context
-    // with antialiasing functionality which takes basic filled or outlined shapes
-    // or a path and outputs vertexes, elements and draw commands.
-    // The actual draw list API is not required to be used directly while using this
-    // library since converting the default library draw command output is done by
-    // just calling `nk_convert` but I decided to still make this library accessible
-    // since it can be useful.
-    // 
-    // The draw list is based on a path buffering and polygon and polyline
-    // rendering API which allows a lot of ways to draw 2D content to screen.
-    // In fact it is probably more powerful than needed but allows even more crazy
-    // things than this library provides by default.
-    */
-    when #config(NK_UINT_DRAW_INDEX, false) do Draw_Index :: u32
-    else do Draw_Index :: u16
-
-    Draw_List_Stroke :: enum i32
-    {
-        /* build up path has no connection back to the beginning */
-        Open = 0,
-
-        /* build up path has a connection back to the beginning */
-        Closed = 1,
-    }
-
-    Draw_Vertex_Layout_Attribute :: enum i32
-    {
-        Position,
-        Color,
-        Texcoord,
-    }
-
-    Draw_Vertex_Layout_Format :: enum i32
-    {
-        SChar,
-        SShort,
-        SInt,
-        UChar,
-        UShort,
-        UInt,
-        Float,
-        Double,
-        R8G8B8,
-        R16G15B16,
-        R32G32B32,
-        R8G8B8A8,
-        B8G8R8A8,
-        R16G15B16A16,
-        R32G32B32A32,
-        R32G32B32A32_Float,
-        R32G32B32A32_Double,
-        RGB32,
-        RGBA32,
-    }
-
-    Draw_Vertex_Layout_Element :: struct
-    {
-        attribute: Draw_Vertex_Layout_Attribute,
-        format: Draw_Vertex_Layout_Format,
-        offset: Size,
-    }
-
-    when #config(NK_INCLUDE_COMMAND_USERDATA, true)
-    {
-        Draw_Command :: struct
-        {
-            /* number of elements in the current draw batch */
-            elem_count: u32,
-            
-            /* current screen clipping rectangle */
-            clip_rect: Rect,
-            
-            /* current texture to set */
-            texture: Handle,
-            
-            userdata: Handle,
-        }
-    }
-    else
-    {
-        Draw_Command :: struct
-        {
-            /* number of elements in the current draw batch */
-            elem_count: u32,
-            
-            /* current screen clipping rectangle */
-            clip_rect: Rect,
-            
-            /* current texture to set */
-            texture: Handle,
-        }
-    }
-    
-    when #config(NK_INCLUDE_COMMAND_USERDATA, true)
-    {   
-        Draw_List :: struct
-        {
-            clip_rect: Rect,
-            circle_vtx: [12]Vec2,
-            config: Convert_Config,
-            
-            buffer,
-            vertices,
-            elements: ^Buffer,
-            
-            element_count,
-            vertex_count,
-            cmd_count: u32,
-            cmd_offset: Size,
-            
-            path_count,
-            path_offset: u32,
-            
-            line_aa,
-            shape_aa: Anti_Aliasing,
-            
-            userdata: Handle,
-        }
-    }
-    else
-    {
-        Draw_List :: struct
-        {
-            clip_rect: Rect,
-            circle_vtx: [12]Vec2,
-            config: Convert_Config,
-            buffer,
-            vertices,
-            elements: ^Buffer,
-            
-            element_count,
-            vertex_count,
-            cmd_count: u32,
-            cmd_offset: Size,
-            
-            path_count,
-            path_offset: u32,
-            
-            line_aa,
-            shape_aa: Anti_Aliasing,
-        }
-    }
 }
 
 Style_Item_Type :: enum i32
@@ -1676,7 +1308,7 @@ Style_Window_Header :: struct
     padding,
     label_padding,
     spacing: Vec2,
-};
+}
 
 Style_Window :: struct
 {
@@ -1967,20 +1599,12 @@ Config_Stack :: struct(T: typeid, S: i32)
     elements: [S]Config_Stack_Element(T),
 }
 
-Config_Stack_Style_Item_Element :: Config_Stack_Element(Style_Item)
-Config_Stack_Float_Element :: Config_Stack_Element(f32)
-Config_Stack_Vec2_Element :: Config_Stack_Element(Vec2)
-Config_Stack_Flags_Element :: Config_Stack_Element(Flags)
-Config_Stack_Color_Element :: Config_Stack_Element(Color)
-Config_Stack_User_Font_Element :: Config_Stack_Element(User_Font)
-Config_Stack_Button_Behavior_Element :: Config_Stack_Element(Button_Behavior)
-
 Config_Stack_Style_Item :: Config_Stack(Style_Item, STYLE_ITEM_STACK_SIZE)
 Config_Stack_Float :: Config_Stack(f32, FLOAT_STACK_SIZE)
 Config_Stack_Vec2 :: Config_Stack(Vec2, VECTOR_STACK_SIZE)
 Config_Stack_Flags :: Config_Stack(Flags, FLAGS_STACK_SIZE)
 Config_Stack_Color :: Config_Stack(Color, COLOR_STACK_SIZE)
-Config_Stack_User_Font :: Config_Stack(User_Font, FONT_STACK_SIZE)
+Config_Stack_User_Font :: Config_Stack(^User_Font, FONT_STACK_SIZE)
 Config_Stack_Button_Behavior :: Config_Stack(Button_Behavior, BUTTON_BEHAVIOR_STACK_SIZE)
 
 Configuration_Stacks :: struct
@@ -2038,168 +1662,40 @@ Pool :: struct
     cap: Size,
 }
 
-INCLUDE_VERTEX_BUFFER_OUTPUT :: #config(NK_INCLUDE_VERTEX_BUFFER_OUTPUT, false)
-INCLUDE_COMMAND_USERDATA :: #config(NK_INCLUDE_COMMAND_USERDATA, true)
-
-when INCLUDE_VERTEX_BUFFER_OUTPUT && INCLUDE_COMMAND_USERDATA
+Context :: struct
 {
-    Context :: struct
-    {
-        /* public: can be accessed freely */
-        input: Input,
-        style: Style,
-        memory: Buffer,
-        clip: Clipboard,
-        last_widget_state: Flags,
-        button_behavior: Button_Behavior,
-        stacks: Configuration_Stacks,
-        delta_time_seconds: f32,
-        
-        /*
-        private:
-        should only be accessed if you
-        know what you are doing */
-        draw_list: Draw_List,
-        
-        userdata: Handle,
-        /* text editor objects are quite big because of an internal
-        * undo/redo stack. Therefore it does not make sense to have one for
-        * each window for temporary use cases, so I only provide *one* instance
-        * for all windows. This works because the content is cleared anyway */
-        text_edit: Text_Edit,
-        
-        /* draw buffer used for overlay drawing operation like cursor */
-        overlay: Command_Buffer,
-        
-        /* windows */
-        build,
-        use_pool: i32,
-        pool: Pool,
-        begin,
-        end,
-        active,
-        current: ^Window,
-        freelist: ^Page_Element,
-        count,
-        seq: u32,
-    }
+    /* public: can be accessed freely */
+    input: Input,
+    style: Style,
+    memory: Buffer,
+    clip: Clipboard,
+    last_widget_state: Flags,
+    button_behavior: Button_Behavior,
+    stacks: Configuration_Stacks,
+    delta_time_seconds: f32,
+    
+    userdata: Handle,
+    /* text editor objects are quite big because of an internal
+    * undo/redo stack. Therefore it does not make sense to have one for
+    * each window for temporary use cases, so I only provide *one* instance
+    * for all windows. This works because the content is cleared anyway */
+    text_edit: Text_Edit,
+    
+    /* draw buffer used for overlay drawing operation like cursor */
+    overlay: Command_Buffer,
+    
+    /* windows */
+    build,
+    use_pool: i32,
+    pool: Pool,
+    begin,
+    end,
+    active,
+    current: ^Window,
+    freelist: ^Page_Element,
+    count,
+    seq: u32,
 }
-else when INCLUDE_VERTEX_BUFFER_OUTPUT
-{
-    Context :: struct
-    {
-        /* public: can be accessed freely */
-        input: Input,
-        style: Style,
-        memory: Buffer,
-        clip: Clipboard,
-        last_widget_state: Flags,
-        button_behavior: Button_Behavior,
-        stacks: Configuration_Stacks,
-        delta_time_seconds: f32,
-        
-        /*
-        private:
-        should only be accessed if you
-        know what you are doing */
-        draw_list: Draw_List,
-        
-        /* text editor objects are quite big because of an internal
-        * undo/redo stack. Therefore it does not make sense to have one for
-        * each window for temporary use cases, so I only provide *one* instance
-        * for all windows. This works because the content is cleared anyway */
-        text_edit: Text_Edit,
-        
-        /* draw buffer used for overlay drawing operation like cursor */
-        overlay: Command_Buffer,
-        
-        /* windows */
-        build,
-        use_pool: i32,
-        pool: Pool,
-        begin,
-        end,
-        active,
-        current: ^Window,
-        freelist: ^Page_Element,
-        count,
-        seq: u32,
-    }
-}
-else when INCLUDE_COMMAND_USERDATA
-{
-    Context :: struct
-    {
-        /* public: can be accessed freely */
-        input: Input,
-        style: Style,
-        memory: Buffer,
-        clip: Clipboard,
-        last_widget_state: Flags,
-        button_behavior: Button_Behavior,
-        stacks: Configuration_Stacks,
-        delta_time_seconds: f32,
-        
-        userdata: Handle,
-        /* text editor objects are quite big because of an internal
-        * undo/redo stack. Therefore it does not make sense to have one for
-        * each window for temporary use cases, so I only provide *one* instance
-        * for all windows. This works because the content is cleared anyway */
-        text_edit: Text_Edit,
-        
-        /* draw buffer used for overlay drawing operation like cursor */
-        overlay: Command_Buffer,
-        
-        /* windows */
-        build,
-        use_pool: i32,
-        pool: Pool,
-        begin,
-        end,
-        active,
-        current: ^Window,
-        freelist: ^Page_Element,
-        count,
-        seq: u32,
-    }
-}
-else
-{
-    Context :: struct
-    {
-        /* public: can be accessed freely */
-        input: Input,
-        style: Style,
-        memory: Buffer,
-        clip: Clipboard,
-        last_widget_state: Flags,
-        button_behavior: Button_Behavior,
-        stacks: Configuration_Stacks,
-        delta_time_seconds: f32,
-        
-        /* text editor objects are quite big because of an internal
-        * undo/redo stack. Therefore it does not make sense to have one for
-        * each window for temporary use cases, so I only provide *one* instance
-        * for all windows. This works because the content is cleared anyway */
-        text_edit: Text_Edit,
-        
-        /* draw buffer used for overlay drawing operation like cursor */
-        overlay: Command_Buffer,
-        
-        /* windows */
-        build,
-        use_pool: i32,
-        pool: Pool,
-        begin,
-        end,
-        active,
-        current: ^Window,
-        freelist: ^Page_Element,
-        count,
-        seq: u32,
-    }
-}
-
 
 when ODIN_OS == .Windows && ODIN_ARCH == .amd64
 {
@@ -2209,27 +1705,24 @@ when ODIN_OS == .Windows && ODIN_ARCH == .amd64
 @(default_calling_convention="c", link_prefix="nk_")
 foreign nuklear
 {
-    when #config(NK_INCLUDE_DEFAULT_ALLOCATOR, false)
-    {
-        /*
-        // #### nk_init_default
-        // Initializes a `nk_context`  with a default standard library allocator.
-        // Should be used if you don't want to be bothered with memory management in nuklear.
-        //
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~c
-        // bool nk_init_default(ctx: ^Context, const  nk_user_font *font);
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        //
-        // Parameter   | Description
-        // ------------|---------------------------------------------------------------
-        // __ctx__     | Must point to an either stack or heap allocated `nk_context` 
-        // __font__    | Must point to a previously initialized font handle for more info look at font documentation
-        //
-        // Returns either `false(0)` on failure or `true(1)` on success.
-        //
-        */
-        init_default :: proc(ctx: ^Context, user_font: ^User_Font) -> bool ---
-    }
+    /*
+    // #### nk_init_default
+    // Initializes a `nk_context`  with a default standard library allocator.
+    // Should be used if you don't want to be bothered with memory management in nuklear.
+    //
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~c
+    // bool nk_init_default(ctx: ^Context, const  nk_user_font *font);
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //
+    // Parameter   | Description
+    // ------------|---------------------------------------------------------------
+    // __ctx__     | Must point to an either stack or heap allocated `nk_context` 
+    // __font__    | Must point to a previously initialized font handle for more info look at font documentation
+    //
+    // Returns either `false(0)` on failure or `true(1)` on success.
+    //
+    */
+    init_default :: proc(ctx: ^Context, user_font: ^User_Font) -> bool ---
 
     /*
     // #### nk_init_fixed
@@ -2329,41 +1822,35 @@ foreign nuklear
     */
     free :: proc(ctx: ^Context) ---
 
-    when #config(NK_INCLUDE_COMMAND_USERDATA, true)
-    {
-        /*
-        // #### nk_set_user_data
-        // Sets the currently passed userdata passed down into each draw command.
-        //
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~c
-        // void nk_set_user_data(ctx: ^Context, nk_handle data);
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        //
-        // Parameter   | Description
-        // ------------|--------------------------------------------------------------
-        // __ctx__     | Must point to a previously initialized `nk_context` 
-        // __data__    | Handle with either pointer or index to be passed into every draw commands
-        */
-        set_user_data :: proc(ctx: ^Context, handle: Handle) ---
-    }
+    /*
+    // #### nk_set_user_data
+    // Sets the currently passed userdata passed down into each draw command.
+    //
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~c
+    // void nk_set_user_data(ctx: ^Context, nk_handle data);
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //
+    // Parameter   | Description
+    // ------------|--------------------------------------------------------------
+    // __ctx__     | Must point to a previously initialized `nk_context` 
+    // __data__    | Handle with either pointer or index to be passed into every draw commands
+    */
+    set_user_data :: proc(ctx: ^Context, handle: Handle) ---
 
-    when #config(NK_INCLUDE_COMMAND_USERDATA, true)
-    {
-        /*
-        // #### nk_set_user_data
-        // Sets the currently passed userdata passed down into each draw command.
-        //
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~c
-        // void nk_set_user_data(ctx: ^Context, nk_handle data);
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        //
-        // Parameter   | Description
-        // ------------|--------------------------------------------------------------
-        // __ctx__     | Must point to a previously initialized `nk_context` 
-        // __data__    | Handle with either pointer or index to be passed into every draw commands
-        */
-        //set_user_data :: proc(ctx: ^Context, handle: Handle) ---
-    }
+    /*
+    // #### nk_set_user_data
+    // Sets the currently passed userdata passed down into each draw command.
+    //
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~c
+    // void nk_set_user_data(ctx: ^Context, nk_handle data);
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //
+    // Parameter   | Description
+    // ------------|--------------------------------------------------------------
+    // __ctx__     | Must point to a previously initialized `nk_context` 
+    // __data__    | Handle with either pointer or index to be passed into every draw commands
+    */
+    //set_user_data :: proc(ctx: ^Context, handle: Handle) ---
 
     /*
     // #### nk_input_begin
@@ -2569,109 +2056,6 @@ foreign nuklear
     // // Iterates over each draw command inside the context draw command list
     // */
     // #define nk_foreach(c, ctx) for((c) = nk__begin(ctx); (c) != 0; (c) = nk__next(ctx,c))
-
-    when #config(NK_INCLUDE_VERTEX_BUFFER_OUTPUT, false)
-    {
-        /*
-        // #### nk_convert
-        // Converts all internal draw commands into vertex draw commands and fills
-        // three buffers with vertexes, vertex draw commands and vertex indices. The vertex format
-        // as well as some other configuration values have to be configured by filling out a
-        // `nk_convert_config` .
-        //
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~c
-        // Flags nk_convert(ctx: ^Context,  nk_buffer *cmds,
-        //      nk_buffer *vertices,  nk_buffer *elements, const  nk_convert_config*);
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        //
-        // Parameter   | Description
-        // ------------|-----------------------------------------------------------
-        // __ctx__     | Must point to an previously initialized `nk_context`  at the end of a frame
-        // __cmds__    | Must point to a previously initialized buffer to hold converted vertex draw commands
-        // __vertices__| Must point to a previously initialized buffer to hold all produced vertices
-        // __elements__| Must point to a previously initialized buffer to hold all produced vertex indices
-        // __config__  | Must point to a filled out `nk_config`  to configure the conversion process
-        //
-        // Returns one of nk_convert_result error codes
-        //
-        // Parameter                       | Description
-        // --------------------------------|-----------------------------------------------------------
-        // NK_CONVERT_SUCCESS              | Signals a successful draw command to vertex buffer conversion
-        // NK_CONVERT_INVALID_PARAM        | An invalid argument was passed in the function call
-        // NK_CONVERT_COMMAND_BUFFER_FULL  | The provided buffer for storing draw commands is full or failed to allocate more memory
-        // NK_CONVERT_VERTEX_BUFFER_FULL   | The provided buffer for storing vertices is full or failed to allocate more memory
-        // NK_CONVERT_ELEMENT_BUFFER_FULL  | The provided buffer for storing indices is full or failed to allocate more memory
-        */
-        convert :: proc(ctx: ^Context, cmds, vertices, elements: ^Buffer, cfg: ^Convert_Config) -> Flags ---
-        
-        /*
-        // #### nk__draw_begin
-        // Returns a draw vertex command buffer iterator to iterate over the vertex draw command buffer
-        //
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~c
-        // const  nk_draw_command* nk__draw_begin(const ^Context, const  nk_buffer*);
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        //
-        // Parameter   | Description
-        // ------------|-----------------------------------------------------------
-        // __ctx__     | Must point to an previously initialized `nk_context`  at the end of a frame
-        // __buf__     | Must point to an previously by `nk_convert` filled out vertex draw command buffer
-        //
-        // Returns vertex draw command pointer pointing to the first command inside the vertex draw command buffer
-        */
-        _draw_begin :: proc(ctx: ^Context, buf: ^Buffer) -> ^Draw_Command ---
-        
-        /*
-        // #### nk__draw_end
-        // Returns the vertex draw command at the end of the vertex draw command buffer
-        //
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~c
-        // const  nk_draw_command* nk__draw_end(const ctx: ^Context, const  nk_buffer *buf);
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        //
-        // Parameter   | Description
-        // ------------|-----------------------------------------------------------
-        // __ctx__     | Must point to an previously initialized `nk_context`  at the end of a frame
-        // __buf__     | Must point to an previously by `nk_convert` filled out vertex draw command buffer
-        //
-        // Returns vertex draw command pointer pointing to the end of the last vertex draw command inside the vertex draw command buffer
-        */
-        _draw_end :: proc(ctx: ^Context, buf: ^Buffer) -> ^Draw_Command ---
-
-        /*
-        // #### nk__draw_next
-        // Increments the vertex draw command buffer iterator
-        //
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~c
-        // const  nk_draw_command* nk__draw_next(const  nk_draw_command*, const  nk_buffer*, const ^Context);
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        //
-        // Parameter   | Description
-        // ------------|-----------------------------------------------------------
-        // __cmd__     | Must point to an previously either by `nk__draw_begin` or `nk__draw_next` returned vertex draw command
-        // __buf__     | Must point to an previously by `nk_convert` filled out vertex draw command buffer
-        // __ctx__     | Must point to an previously initialized `nk_context`  at the end of a frame
-        //
-        // Returns vertex draw command pointer pointing to the end of the last vertex draw command inside the vertex draw command buffer
-        */
-        _draw_next :: proc(^Draw_Command, ^Buffer, ^Context) -> ^Draw_Command ---
-        
-        /*
-        // #### nk_draw_foreach
-        // Iterates over each vertex draw command inside a vertex draw command buffer
-        //
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~c
-        // #define nk_draw_foreach(cmd,ctx, b)
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        //
-        // Parameter   | Description
-        // ------------|-----------------------------------------------------------
-        // __cmd__     | `nk_draw_command`iterator set to NULL
-        // __buf__     | Must point to an previously by `nk_convert` filled out vertex draw command buffer
-        // __ctx__     | Must point to an previously initialized `nk_context`  at the end of a frame
-        #define nk_draw_foreach(cmd,ctx, b) for((cmd)=nk__draw_begin(ctx, b); (cmd)!=0; (cmd)=nk__draw_next(cmd, b, ctx))
-        */
-    }
 
     /*
     // #### nk_begin
@@ -4007,25 +3391,6 @@ foreign nuklear
     image :: proc(ctx: ^Context, image: Image) ---
     image_color :: proc(ctx: ^Context, image: Image, color: Color) ---
 
-    when #config(NK_INCLUDE_STANDARD_VARARGS, true)
-    {
-        // labelf :: proc(ctx: ^Context, nk_flags, NK_PRINTF_FORMAT_STRING const char*, ...) NK_PRINTF_VARARG_FUNC(3) ---
-        // labelf_colored :: proc(ctx: ^Context, nk_flags, color: Color, NK_PRINTF_FORMAT_STRING const char*,...) NK_PRINTF_VARARG_FUNC(4) ---
-        // labelf_wrap :: proc(ctx: ^Context, NK_PRINTF_FORMAT_STRING const char*,...) NK_PRINTF_VARARG_FUNC(2) ---
-        // labelf_colored_wrap :: proc(ctx: ^Context, color: Color, NK_PRINTF_FORMAT_STRING const char*,...) NK_PRINTF_VARARG_FUNC(3) ---
-        // labelfv :: proc(ctx: ^Context, nk_flags, NK_PRINTF_FORMAT_STRING const char*, va_list) NK_PRINTF_VALIST_FUNC(3) ---
-        // labelfv_colored :: proc(ctx: ^Context, nk_flags, color: Color, NK_PRINTF_FORMAT_STRING const char*, va_list) NK_PRINTF_VALIST_FUNC(4) ---
-        // labelfv_wrap :: proc(ctx: ^Context, NK_PRINTF_FORMAT_STRING const char*, va_list) NK_PRINTF_VALIST_FUNC(2) ---
-        // labelfv_colored_wrap :: proc(ctx: ^Context, color: Color, NK_PRINTF_FORMAT_STRING const char*, va_list) NK_PRINTF_VALIST_FUNC(3) ---
-        // value_bool :: proc(ctx: ^Context, const char *prefix, i32) ---
-        // value_int :: proc(ctx: ^Context, const char *prefix, i32) ---
-        // value_uint :: proc(ctx: ^Context, const char *prefix, unsigned i32) ---
-        // value_float :: proc(ctx: ^Context, const char *prefix, float) ---
-        // value_color_byte :: proc(ctx: ^Context, const char *prefix, color: Color) ---
-        // value_color_float :: proc(ctx: ^Context, const char *prefix, color: Color) ---
-        // value_color_hex :: proc(ctx: ^Context, const char *prefix, color: Color) ---
-    }
-
     button_text :: proc(ctx: ^Context, title: [^]u8, len: i32) -> bool ---
     button_label :: proc(ctx: ^Context, title: cstring) -> bool ---
     button_color :: proc(ctx: ^Context, color: Color) -> bool ---
@@ -4297,12 +3662,6 @@ foreign nuklear
 
     tooltip :: proc(ctx: ^Context, str: cstring) ---
 
-    when #config(NK_INCLUDE_STANDARD_VARARGS, false)
-    {
-        // tooltipf :: proc(ctx: ^Context, NK_PRINTF_FORMAT_STRING const char*, ...) NK_PRINTF_VARARG_FUNC(2);
-        // tooltipfv :: proc(ctx: ^Context, NK_PRINTF_FORMAT_STRING const char*, va_list) NK_PRINTF_VALIST_FUNC(2);
-    }
-
     tooltip_begin :: proc(ctx: ^Context, width: f32) -> bool ---
     tooltip_end :: proc(ctx: ^Context) ---
 
@@ -4449,11 +3808,6 @@ foreign nuklear
     strtoi :: proc(str: cstring, endptr: [^]cstring) -> i32 ---
     strtof :: proc(str: cstring, endptr: [^]cstring) -> f32 ---
 
-    when #config(NK_STRTOD, true)
-    {
-        strtod :: proc(str: cstring, endptr: [^]cstring) -> f64 ---
-    }
-
     strfilter :: proc(text, regexp: cstring) -> i32 ---
     strmatch_fuzzy_string :: proc(str, pattern: cstring, out_score: ^i32) -> i32 ---
     strmatch_fuzzy_text :: proc(txt: cstring, txt_len: i32, pattern: cstring, out_score: ^i32) -> i32 ---
@@ -4469,45 +3823,7 @@ foreign nuklear
     font_cyrillic_glyph_ranges :: proc() -> ^rune ---
     font_korean_glyph_ranges :: proc() -> ^rune ---
 
-    when INCLUDE_FONT_BAKING
-    {
-        when INCLUDE_FONT_BAKING
-        {
-            font_atlas_init_default :: proc(^Font_Atlas) ---
-        }
-
-        font_atlas_init :: proc(^Font_Atlas, ^Allocator) ---
-        font_atlas_init_custom :: proc(atlas: ^Font_Atlas, persistent, transient: ^Allocator) ---
-        font_atlas_begin :: proc(^Font_Atlas) ---
-
-        font_config :: proc(pixel_height: f32) -> Font_Config ---
-        font_atlas_add :: proc(^Font_Atlas, ^Font_Config) -> ^Font ---
-
-        when INCLUDE_DEFAULT_FONT
-        {
-            font_atlas_add_default :: proc(atlas: ^Font_Atlas, height: f32, config: ^Font_Config) -> ^Font
-        }
-
-        font_atlas_add_from_memory :: proc(atlas: ^Font_Atlas, memory: rawptr, size: Size, height: f32, config: ^Font_Config) -> ^Font ---
-
-        when INCLUDE_STANDARD_IO
-        {
-            font_atlas_add_from_file :: proc(atlas: ^Font_Atlas, file_path: cstring, height: f32, config: ^Font_Config) -> ^Font ---
-        }
-
-        font_atlas_add_compressed :: proc(atlas: ^Font_Atlas, memory: rawptr, size: Size, height: f32, config: ^Font_Config) -> ^Font ---
-        font_atlas_add_compressed_base85 :: proc(atlas: ^Font_Atlas, data: cstring, height: f32, config: ^Font_Config) -> ^Font ---
-        font_atlas_bake :: proc(atlas: ^Font_Atlas, width, height: ^i32, fmt: Font_Atlas_Format) -> rawptr
-        font_atlas_end :: proc(atlas: ^Font_Atlas, tex: Handle, null: ^Draw_Null_Texture) ---
-        font_find_glyph :: proc(font: ^Font, unicode: rune) -> ^Font_Glyph ---
-        font_atlas_cleanup :: proc(atlas: ^Font_Atlas) ---
-        font_atlas_clear :: proc(atlas: ^Font_Atlas) ---
-    }
-
-    when INCLUDE_DEFAULT_ALLOCATOR
-    {
-        buffer_init_default :: proc(^Buffer) ---
-    }
+    buffer_init_default :: proc(^Buffer) ---
 
     buffer_init :: proc(buffer: ^Buffer, allocator: ^Allocator, size: Size) ---
     buffer_init_fixed :: proc(buffer: ^Buffer, memory: rawptr, size: Size) ---
@@ -4521,10 +3837,7 @@ foreign nuklear
     buffer_memory_const :: proc(buffer: ^Buffer) -> rawptr ---
     buffer_total :: proc(buffer: ^Buffer) -> Size ---
 
-    when INCLUDE_DEFAULT_ALLOCATOR
-    {
-        str_init_default :: proc(str: ^Str) ---
-    }
+    str_init_default :: proc(str: ^Str) ---
 
     str_init :: proc(str: ^Str, allocator: ^Allocator, size: Size) ---
     str_init_fixed :: proc(str: ^Str, memory: rawptr, size: Size) ---
@@ -4572,10 +3885,7 @@ foreign nuklear
     filter_oct :: proc(edit: ^Text_Edit, unicode: rune) -> bool ---
     filter_binary :: proc(edit: ^Text_Edit, unicode: rune) -> bool ---
 
-    when INCLUDE_DEFAULT_ALLOCATOR
-    {
-        textedit_init_default :: proc(edit: ^Text_Edit) ---
-    }
+    textedit_init_default :: proc(edit: ^Text_Edit) ---
 
     textedit_init :: proc(edit: ^Text_Edit, allocator: ^Allocator, size: Size) ---
     textedit_init_fixed :: proc(edit: ^Text_Edit, memory: rawptr, size: Size) ---
@@ -4628,46 +3938,6 @@ foreign nuklear
     input_is_key_pressed :: proc(input: ^Input, key: Keys) -> bool ---
     input_is_key_released :: proc(input: ^Input, key: Keys) -> bool ---
     input_is_key_down :: proc(input: ^Input, key: Keys) -> bool ---
-
-    when INCLUDE_VERTEX_BUFFER_OUTPUT
-    {
-        draw_list_init :: proc(list: ^Draw_List) ---
-        draw_list_setup :: proc(list: ^Draw_List, cfg: ^Convert_Config, cmds, vertices, elements: ^Buffer, line_aa,shape_aa: Anti_Aliasing) ---
-        
-        _draw_list_begin :: proc(list: ^Draw_List, buffer: ^Buffer) -> ^Draw_Command ---
-        _draw_list_next :: proc(cmd: ^Draw_Command, buffer: ^Buffer, list: ^Draw_List) -> ^Draw_Command ---
-        _draw_list_end :: proc(list: ^Draw_List, buffer: ^Buffer) -> ^Draw_Command ---
-        
-        draw_list_path_clear :: proc(list: ^Draw_List) ---
-        draw_list_path_line_to :: proc(list: ^Draw_List, pos: Vec2) ---
-        draw_list_path_arc_to_fast :: proc(list: ^Draw_List, center: Vec2, radius: f32, a_min, a_max: i32) ---
-        draw_list_path_arc_to :: proc(list: ^Draw_List, center: Vec2, radius, a_min, a_max: f32, segments: u32) ---
-        draw_list_path_rect_to :: proc(list: ^Draw_List, a, b: Vec2, rounding: f32) ---
-        draw_list_path_curve_to :: proc(list: ^Draw_List, p2, p3, p4: Vec2, num_segments: u32) ---
-        draw_list_path_fill :: proc(list: ^Draw_List, color: Color) ---
-        draw_list_path_stroke :: proc(list: ^Draw_List, color: Color, closed: Draw_List_Stroke, thickness: f32) ---
-
-        draw_list_stroke_line :: proc(list: ^Draw_List, a, b: Vec2, color: Color, thickness: f32) ---
-        draw_list_stroke_rect :: proc(list: ^Draw_List, rect: Rect, color: Color, rounding, thickness: f32) ---
-        draw_list_stroke_triangle :: proc(list: ^Draw_List, a, b, c: Vec2, color: Color, thickness: f32) ---
-        draw_list_stroke_circle :: proc(list: ^Draw_List, center: Vec2, radius: f32, color: Color, segs: u32, thickness: f32) ---
-        draw_list_stroke_curve :: proc(list: ^Draw_List, p0, cp0, cp1, p1: Vec2, color: Color, segments: u32, thickness: f32) ---
-        draw_list_stroke_poly_line :: proc(list: ^Draw_List, pnts: [^]Vec2, cnt: u32, color: Color, stroke: Draw_List_Stroke, thickness: f32, aa: Anti_Aliasing) ---
-
-        draw_list_fill_rect :: proc(list: ^Draw_List, rect: Rect, color: Color, rounding: f32) ---
-        draw_list_fill_rect_multi_color :: proc(list: ^Draw_List, rect: Rect, left, top, right, bottom: Color) ---
-        draw_list_fill_triangle :: proc(list: ^Draw_List, a, b, c: Vec2, color: Color) ---
-        draw_list_fill_circle :: proc(list: ^Draw_List, center: Vec2, radius: f32, color: Color, segs: u32) ---
-        draw_list_fill_poly_convex :: proc(list: ^Draw_List, points: [^]Vec2, count: u32, color: Color, aa: Anti_Aliasing) ---
-
-        draw_list_add_image :: proc(list: ^Draw_List, texture: Image, rect: Rect, color: Color) ---
-        draw_list_add_text :: proc(list: ^Draw_List, font: ^User_Font, rect: Rect, text: cstring, len: i32, font_height: f32, color: Color) ---
-
-        when INCLUDE_COMMAND_USERDATA
-        {
-            draw_list_push_userdata :: proc(list: ^Draw_List, userdata: Handle) ---
-        }
-    }
 
     style_item_color :: proc(color: Color) -> Style_Item ---
     style_item_image :: proc(img: Image) -> Style_Item ---
