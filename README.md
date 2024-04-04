@@ -1,3 +1,5 @@
+Some widget flags still need to be written in the fancy Odin code, since it's a loot I will write based on my needs.
+
 This binding is built with immutable Nuklear flags in mind, so with if you need to add or remove, its required to check if the binding dont broke.
 
 * NK_INCLUDE_COMMAND_USERDATA
