@@ -1205,6 +1205,7 @@ Style_Chart :: struct
     padding: Vec2,
     color_factor,
     disabled_factor: f32,
+    show_markers: bool,
 }
 
 Style_Combo :: struct
@@ -1395,6 +1396,7 @@ Chart_Slot :: struct
     count: i32,
     last: Vec2,
     index: i32,
+    show_markers: bool,
 }
 
 Chart :: struct
