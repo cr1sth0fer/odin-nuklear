@@ -377,7 +377,6 @@ Edit_Flag :: enum i32
 
 Edit_Flags :: bit_set[Edit_Flag; i32]
 
-EDIT_DEFAULT :: Edit_Flags{}
 EDIT_SIMPLE  :: Edit_Flags{.Always_Insert_Mode}
 EDIT_FIELD  :: Edit_Flags{.Always_Insert_Mode, .Selectable, .Clipboard}
 EDIT_BOX  :: Edit_Flags{.Always_Insert_Mode, .Selectable, .Multiline, .Allow_Tab, .Clipboard}
@@ -1887,7 +1886,7 @@ foreign nuklear
     // __key__     | Must be any value specified in `nk_keys` that needs to be mirrored
     // __down__    | Must be 0 for key is up and 1 for key is down
     */
-    input_key :: proc(ctx: ^Context, Keys, down: bool) ---
+    input_key :: proc(ctx: ^Context, key: Keys, down: bool) ---
 
     /*
     // #### nk_input_button
@@ -1905,7 +1904,7 @@ foreign nuklear
     // __y__       | Must contain an integer describing mouse cursor y-position on click up/down
     // __down__    | Must be 0 for key is up and 1 for key is down
     */
-    input_button :: proc(ctx: ^Context, Buttons, x, y, down: bool) ---
+    input_button :: proc(ctx: ^Context, button: Buttons, x, y: i32, down: bool) ---
 
     /*
     // #### nk_input_scroll
