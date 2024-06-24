@@ -23,18 +23,18 @@ Vec2I   :: [2]i16
 
 Rect :: struct
 {
-    x, y, w, h: f32
+    x, y, w, h: f32,
 }
 
 RectI :: struct
 {
-    x, y, w, h: i16
+    x, y, w, h: i16,
 }
 
 Handle :: struct #raw_union
 {
     ptr: rawptr,
-    id: i32
+    id: i32,
 }
 
 Image :: struct
@@ -53,7 +53,7 @@ Nine_Slice :: struct
 Cursor :: struct
 {
     img: Image,
-    size, offset: Vec2
+    size, offset: Vec2,
 }
 
 Scroll :: [2]u32
@@ -81,7 +81,7 @@ Modify :: enum i32
 Orientation :: enum i32
 {
     Vertical,
-    Horizontal
+    Horizontal,
 }
 
 Collapse_States :: enum i32
@@ -161,7 +161,7 @@ Symbol_Type :: enum i32
     Triangle_Right,
     Plus,
     Minus,
-    Max
+    Max,
 }
 
 Keys :: enum i32
@@ -280,7 +280,7 @@ Widget_Align :: enum i32
     Right       = 0x04,
     Top         = 0x08,
     Middle      = 0x10,
-    Bottom      = 0x20
+    Bottom      = 0x20,
 }
 
 Widget_Alignment :: enum i32
@@ -553,7 +553,7 @@ Buffer :: struct
     calls: i64,
 
     /* current size of the buffer */
-    size: i64
+    size: i64,
 }
 
 /*  Basic string buffer which is only used in context with the text editor
@@ -601,7 +601,7 @@ Text_Edit_Type :: enum i32
 {
     Single_Line,
     Multi_Line,
-};
+}
 
 Text_Edit_Mode :: enum i32
 {
