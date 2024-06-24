@@ -3438,7 +3438,7 @@ foreign nuklear
     slide_float :: proc(ctx: ^Context, min, val, max, step: f32) -> f32 ---
     slide_int :: proc(ctx: ^Context, min, val, max, step: i32) -> i32 ---
     slider_float :: proc(ctx: ^Context, min: f32, val: ^f32, max, step: f32) -> bool ---
-    slider_int :: proc(ctx: ^Context, min, val: ^i32, max, step: i32) -> bool ---
+    slider_int :: proc(ctx: ^Context, min: i32, val: ^i32, max, step: i32) -> bool ---
 
     progress :: proc(ctx: ^Context, cur: ^i64, max: i64, modifyable: bool) -> bool ---
     prog :: proc(ctx: ^Context, cur: i64, max: i64, modifyable: bool) -> i64 ---
