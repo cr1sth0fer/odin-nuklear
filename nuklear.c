@@ -1,6 +1,4 @@
 #define _CRT_SECURE_NO_WARNINGS
-#define NK_INCLUDE_COMMAND_USERDATA
-#define NK_INCLUDE_DEFAULT_ALLOCATOR
 #define NK_KEYSTATE_BASED_INPUT
 #define NK_INCLUDE_STANDARD_BOOL
 #define NK_INCLUDE_FIXED_TYPES
@@ -25,7 +23,6 @@ int main()
     TYPE_ASSERT(struct nk_cursor, "Cursor");
     TYPE_ASSERT(struct nk_scroll, "Scroll");
     TYPE_ASSERT(struct nk_allocator, "Allocator");
-    TYPE_ASSERT(struct nk_draw_null_texture, "Draw_Null_Texture");
     TYPE_ASSERT(struct nk_list_view, "List_View");
     TYPE_ASSERT(struct nk_user_font, "User_Font");
     TYPE_ASSERT(struct nk_memory_status, "Memory_Status");
