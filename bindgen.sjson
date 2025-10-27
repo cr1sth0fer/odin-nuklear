@@ -1,0 +1,202 @@
+inputs = [
+    "."
+]
+
+package_name = "nuklear"
+
+output_folder = "."
+
+remove_type_prefix = "nk_"
+remove_macro_prefix = "NK_"
+remove_function_prefix = "nk_"
+
+rename = {
+    "nk_char" = "i8",
+    "nk_uchar" = "u8",
+    "nk_byte" = "byte",
+    "nk_short" = "i16",
+    "nk_ushort" = "u16",
+    "nk_int" = "i32",
+    "nk_uint" = "u32",
+    "nk_size" = "uint",
+    "nk_ptr" = "rawptr",
+    "nk_bool" = "bool",
+    "nk_hash" = "Hash",
+    "nk_flags" = "Flags",
+    "nk_rune" = "rune",
+    "nk_false" = "false",
+    "nk_true" = "true",
+    "nk_panel_flags" = "Panel_Flag",
+    "nk_text_align" = "Text_Align",
+    "nk_widget_align" = "Widget_Align",
+    "nk_edit_flags" = "Edit_Flag",
+    "nk_chart_event" = "Chart_Event_Flag",
+    "nk_recti" = "RectI",
+    "nk_vec2i" = "Vec2I",
+}
+
+type_overrides = {
+    "nk_color" = "[4]byte",
+    "nk_colorf" = "[4]f32",
+    "nk_vec2" = "[2]f32",
+    "nk_vec2i" = "[2]i16",
+    "nk_collapse_states" = "enum i32 {\n    MINIMIZED = 0,\n    MAXIMIZED = 1,\n}",
+    
+}
+
+remove = [
+    "nk_char",
+    "nk_uchar",
+    "nk_byte",
+    "nk_short",
+    "nk_ushort",
+    "nk_int",
+    "nk_uint",
+    "nk_size",
+    "nk_ptr",
+    "nk_bool",
+    // "nk_flags",
+    "nk_rune",
+    "nk_anti_aliasing",
+    "nk_draw_list_stroke",
+    "nk_draw_vertex_layout_attribute",
+    "nk_draw_vertex_layout_format",
+    "nk_draw_vertex_layout_element",
+    "nk_convert_config",
+    "nk_draw_command",
+    "nk_draw_list",
+    "nk_false",
+    "nk_true",
+    "nk_style_slide",
+    "nk_text_alignment",
+    "nk_widget_alignment",
+    "nk_edit_types",
+    "NK_UTF_INVALID",
+    "NK_STRTOD",
+]
+
+force_ada_case_types = true
+
+remove_enum_members = [
+    "*_MAX",
+    "*_COUNT",
+]
+
+clang_defines = {
+	"NK_STATIC_ASSERT()" = "1",
+	"NK_INCLUDE_FIXED_TYPES" = "1",
+	"NK_INCLUDE_STANDARD_BOOL" = "1",
+	"NK_INCLUDE_COMMAND_USERDATA" = "1",
+	"NK_KEYSTATE_BASED_INPUT" = "1",
+}
+
+bit_setify = {
+	"nk_panel_flags" = "Panel_Flags",
+	"nk_text_align" = "Text_Alignment",
+	"nk_widget_align" = "Widget_Alignment",
+	"nk_edit_flags" = "Edit_Flags",
+	"nk_chart_event" = "Chart_Event",
+}
+
+procedure_type_overrides = {
+	"nk_begin.flags"   = "Panel_Flags",
+	"nk_begin_titled.flags"   = "Panel_Flags",
+	"nk_group_begin.#2" = "Panel_Flags",
+	"nk_group_begin_titled.#3" = "Panel_Flags",
+	"nk_group_scrolled_begin.3" = "Panel_Flags",
+	"nk_group_scrolled_offset_begin.flags" = "Panel_Flags",
+	"nk_group_scrolled_begin.#3" = "Panel_Flags",
+	"nk_list_view_begin.#3" = "Panel_Flags",
+	"nk_text.#3" = "Text_Alignment",
+	"nk_text_colored.#3" = "Text_Alignment",
+	"nk_label.align" = "Text_Alignment",
+	"nk_label_colored.align" = "Text_Alignment",
+	"nk_button_symbol_label.text_alignment" = "Text_Alignment",
+	"nk_button_symbol_text.alignment" = "Text_Alignment",
+	"nk_button_image_label.text_alignment" = "Text_Alignment",
+	"nk_button_image_text.alignment" = "Text_Alignment",
+	"nk_button_symbol_text_styled.alignment" = "Text_Alignment",
+	"nk_button_symbol_label_styled.align" = "Text_Alignment",
+	"nk_button_image_label_styled.text_alignment" = "Text_Alignment",
+	"nk_button_image_text_styled.alignment" = "Text_Alignment",
+	
+	"nk_check_text_align.widget_alignment" = "Widget_Alignment",
+	"nk_check_text_align.text_alignment" = "Text_Alignment",
+	
+	"nk_checkbox_label_align.widget_alignment" = "Widget_Alignment",
+	"nk_checkbox_label_align.text_alignment" = "Text_Alignment",
+	
+	"nk_checkbox_text_align.widget_alignment" = "Widget_Alignment",
+	"nk_checkbox_text_align.text_alignment" = "Text_Alignment",
+	
+	"nk_radio_label_align.widget_alignment" = "Widget_Alignment",
+	"nk_radio_label_align.text_alignment" = "Text_Alignment",
+	
+	"nk_radio_text_align.widget_alignment" = "Widget_Alignment",
+	"nk_radio_text_align.text_alignment" = "Text_Alignment",
+	
+    "nk_option_label_align.widget_alignment" = "Widget_Alignment",
+	"nk_option_label_align.text_alignment" = "Text_Alignment",
+	
+    "nk_option_text_align.widget_alignment" = "Widget_Alignment",
+	"nk_option_text_align.text_alignment" = "Text_Alignment",
+	
+	"nk_selectable_label.align" = "Text_Alignment",
+	"nk_selectable_text.align" = "Text_Alignment",
+	"nk_selectable_image_label.align" = "Text_Alignment",
+	"nk_selectable_image_text.align" = "Text_Alignment",
+	"nk_selectable_symbol_label.align" = "Text_Alignment",
+	"nk_selectable_symbol_text.align" = "Text_Alignment",
+	"nk_select_label.align" = "Text_Alignment",
+	"nk_select_text.align" = "Text_Alignment",
+	"nk_select_image_label.align" = "Text_Alignment",
+	"nk_select_image_text.align" = "Text_Alignment",
+	"nk_select_symbol_label.align" = "Text_Alignment",
+	"nk_select_symbol_text.align" = "Text_Alignment",
+	
+	"nk_edit_string.#1" = "Edit_Flags",
+	"nk_edit_string" = "Edit_Flags",
+	
+	"nk_edit_string_zero_terminated.#1" = "Edit_Flags",
+	"nk_edit_string_zero_terminated" = "Edit_Flags",
+	
+	"nk_edit_buffer.#1" = "Edit_Flags",
+	"nk_edit_buffer" = "Edit_Flags",
+	
+	"nk_edit_focus.flags" = "Edit_Flags",
+	
+	"nk_chart_push" = "Chart_Event",
+	"nk_chart_push_slot" = "Chart_Event",
+	
+	"nk_combo_item_label.alignment" = "Text_Alignment",
+	"nk_combo_item_text.alignment" = "Text_Alignment",
+	"nk_combo_item_image_label.alignment" = "Text_Alignment",
+	"nk_combo_item_image_text.alignment" = "Text_Alignment",
+	"nk_combo_item_symbol_label.alignment" = "Text_Alignment",
+	"nk_combo_item_symbol_text.alignment" = "Text_Alignment",
+
+	"nk_contextual_begin.#1" = "Panel_Flags",
+	"nk_contextual_item_text.align" = "Text_Alignment",
+	"nk_contextual_item_label.align" = "Text_Alignment",
+	"nk_contextual_item_image_label.alignment" = "Text_Alignment",
+	"nk_contextual_item_image_text.alignment" = "Text_Alignment",
+	"nk_contextual_item_symbol_label.alignment" = "Text_Alignment",
+	"nk_contextual_item_symbol_text.alignment" = "Text_Alignment",
+	
+	"nk_menu_begin_text.align" = "Text_Alignment",
+	"nk_menu_begin_label.align" = "Text_Alignment",
+	"nk_menu_begin_image.align" = "Text_Alignment",
+	"nk_menu_begin_image_text.align" = "Text_Alignment",
+	"nk_menu_begin_image_label.align" = "Text_Alignment",
+	"nk_menu_begin_symbol.align" = "Text_Alignment",
+	"nk_menu_begin_symbol_text.align" = "Text_Alignment",
+	"nk_menu_begin_symbol_label.align" = "Text_Alignment",
+	"nk_menu_item_text.align" = "Text_Alignment",
+	"nk_menu_item_label.alignment" = "Text_Alignment",
+	"nk_menu_item_image_label.alignment" = "Text_Alignment",
+	"nk_menu_item_image_text.alignment" = "Text_Alignment",
+	"nk_menu_item_symbol_text.alignment" = "Text_Alignment",
+	"nk_menu_item_symbol_label.alignment" = "Text_Alignment",
+
+	"nk_popup_begin.#3" = "Panel_Flags",
+}
