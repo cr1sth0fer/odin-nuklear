@@ -18,3 +18,9 @@ jobs:
       - name: Compile C file using CL
         shell: cmd
         run: build_with_msvc.bat
+
+      - name: Upload windows amd64 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuklear_windows_amd64
+          path: nuklear_windows_amd64.lib
