@@ -16,4 +16,5 @@ jobs:
           arch: x64 # Specifies the 64-bit target architecture
 
       - name: Compile C file using CL
+        shell: cmd
         run: build_with_msvc.bat
