@@ -1,0 +1,19 @@
+name: Build C with MSVC
+
+on: [push] # Trigger: This workflow runs on every push to the repo
+
+jobs:
+  build:
+    runs-on: windows-latest # Uses the latest Windows runner
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC Developer Command Prompt
+        uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: x64 # Specifies the 64-bit target architecture
+
+      - name: Compile C file using CL
+        run: build_with_msvc.cmd
