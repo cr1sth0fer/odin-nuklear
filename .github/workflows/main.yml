@@ -24,3 +24,14 @@ jobs:
         with:
           name: nuklear_windows_amd64
           path: nuklear_windows_amd64.lib
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Commit nuklear_windows_amd64.lib file back to repository
+        run: |
+          git config --local user.name "github-actions"
+          git config --local user.email "github-actions@users.noreply.github.com"
+          git add nuklear_windows_amd64.lib
+          git commit -m "Commit nuklear_windows_amd64.lib file back to repository"
+          git push
