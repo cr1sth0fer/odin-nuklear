@@ -29,8 +29,6 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          persist-credentials: false  # This is crucial [citation:9]
 
       - name: Commit nuklear_windows_amd64.lib file back to repository
         run: |
